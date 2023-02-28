@@ -17,11 +17,11 @@ jobs:
 
     - name: Build packages
       run: |
-        cd dvbhdhomerun
+        cd $GITHUB_WORKSPACE/dvbhdhomerun
         dpkg-buildpackage -b
       
-    - name: Upload the Build Artifact
+    - name: Upload the Build Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: packages
-        path: ../*.deb
+        name: Packages
+        path: $GITHUB_WORKSPACE/../*.deb
