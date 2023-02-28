@@ -14,7 +14,7 @@ jobs:
     - name: Packages update
       run: |
         sudo apt-get update
-        sudo apt install dpkg-dev build-essential
+        sudo apt install dpkg-dev build-essential debhelper cmake libhdhomerun-dev dkms
 
     - name: Build packages
       run: |
