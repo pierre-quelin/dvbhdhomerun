@@ -1,0 +1,27 @@
+name: Ubuntu package build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository 
+      uses: actions/checkout@v3
+        
+    - name: Packages update
+      run: |
+        sudo apt-get update
+
+    - name: Build packages
+      run: |
+        cd dvbhdhomerun
+        dpkg-buildpackage -b
+      
+    - name: Upload the Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages
+        path: ../*.deb
