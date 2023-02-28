@@ -26,5 +26,20 @@ jobs:
     - name: Upload the Build Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: Packages
-        path: ./*.deb
+        name: dvbhdhomerun-dkms package
+        path: ./dvbhdhomerun-dkms*.deb
+
+      uses: actions/upload-artifact@v3
+      with:
+        name: dvbhdhomerun-source package
+        path: ./dvbhdhomerun-source*.deb
+
+      uses: actions/upload-artifact@v3
+      with:
+        name: dvbhdhomerun-utils package
+        path: ./dvbhdhomerun-utils*.deb
+
+      uses: actions/upload-artifact@v3
+      with:
+        name: dvbhdhomerun-utils-dbg package
+        path: ./dvbhdhomerun-utils-dbg*.deb
