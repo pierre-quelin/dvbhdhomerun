@@ -10,6 +10,8 @@ jobs:
     steps:
     - name: Check out repository 
       uses: actions/checkout@v3
+      with:
+        path: dvbhdhomerun
         
     - name: Packages update
       run: |
@@ -18,11 +20,11 @@ jobs:
 
     - name: Build packages
       run: |
-        cd $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/dvbhdhomerun
         dpkg-buildpackage -b
       
     - name: Upload the Build Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Packages
-        path: $GITHUB_WORKSPACE/../*.deb
+        path: $GITHUB_WORKSPACE/*.deb
