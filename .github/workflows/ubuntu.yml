@@ -14,10 +14,11 @@ jobs:
     - name: Packages update
       run: |
         sudo apt-get update
+        sudo apt install dpkg-dev build-essential
 
     - name: Build packages
       run: |
-        cd $GITHUB_WORKSPACE/dvbhdhomerun
+        cd $GITHUB_WORKSPACE
         dpkg-buildpackage -b
       
     - name: Upload the Build Artifacts
