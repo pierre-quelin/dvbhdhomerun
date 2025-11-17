@@ -16,12 +16,12 @@ all: dvb_hdhomerun
 
 headers: headers/$(KVERMAJ).$(KVERMIN)
 	@echo Downloading kernel header dependencies...
-	@$(foreach var,$(shell grep -h ^\\\#include\ \" $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/*.[ch] 2>/dev/null | sort -u | sed 's/\#include "\(.*\)"/\1/'),curl -# -L -o $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/$(var) https://github.com/torvalds/linux/raw/v$(KVERMAJ).$(KVERMIN)/include/media/$(var);)
+	@$(foreach var,$(shell grep -h ^\\\#include\ \<media $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/media/*.[ch] 2>/dev/null | sort -u | sed 's/\#include <media\/\(.*\)>/\1/'),curl -# -L -o $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/media/$(var) https://github.com/torvalds/linux/raw/v$(KVERMAJ).$(KVERMIN)/include/media/$(var);)
 
 headers/$(KVERMAJ).$(KVERMIN):
 	@echo Downloading kernel headers...
-	@mkdir -p $(PWD)/headers/$(KVERMAJ).$(KVERMIN)
-	@$(foreach var,$(shell grep -h ^\\\#include\ \" *.[ch] 2>/dev/null | grep -v hdhomerun | sort -u | sed 's/\#include "\(.*\)"/\1/'),curl -# -L -o $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/$(var) https://github.com/torvalds/linux/raw/v$(KVERMAJ).$(KVERMIN)/include/media/$(var);)
+	@mkdir -p $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/media
+	@$(foreach var,$(shell grep -h ^\\\#include\ \<media $(PWD)/*.[ch] 2>/dev/null | grep -v hdhomerun | sort -u | sed 's/\#include <media\/\(.*\)>/\1/'),curl -# -L -o $(PWD)/headers/$(KVERMAJ).$(KVERMIN)/media/$(var) https://github.com/torvalds/linux/raw/v$(KVERMAJ).$(KVERMIN)/include/media/$(var);)
 
 dvb_hdhomerun:
 	$(MAKE) -C /lib/modules/$(KERNELRELEASE)/build M=$(PWD) modules
