@@ -46,3 +46,9 @@ jobs:
       with:
         name: dvbhdhomerun-utils-dbg package
         path: ./dvbhdhomerun-utils-dbg*.deb
+
+    - name: Archive all dvbhdhomerun*.deb
+      uses: actions/upload-artifact@v4
+      with:
+        name: dvbhdhomerun packages
+        path: ./dvbhdhomerun*.deb
