@@ -23,22 +23,26 @@ jobs:
         cd $GITHUB_WORKSPACE/dvbhdhomerun
         dpkg-buildpackage -b
       
-    - uses: actions/upload-artifact@v4
+    - name: Archive dvbhdhomerun-dkms*.deb
+      uses: actions/upload-artifact@v4
       with:
         name: dvbhdhomerun-dkms package
         path: ./dvbhdhomerun-dkms*.deb
 
-    - uses: actions/upload-artifact@v4
+    - name: Archive dvbhdhomerun-source*.deb
+      uses: actions/upload-artifact@v4
       with:
         name: dvbhdhomerun-source package
         path: ./dvbhdhomerun-source*.deb
 
-    - uses: actions/upload-artifact@v4
+    - name: Archive dvbhdhomerun-utils*.deb
+      uses: actions/upload-artifact@v4
       with:
         name: dvbhdhomerun-utils package
         path: ./dvbhdhomerun-utils*.deb
 
-    - uses: actions/upload-artifact@v4
+    - name: Archive dvbhdhomerun-utils-dbg*.deb
+      uses: actions/upload-artifact@v4
       with:
         name: dvbhdhomerun-utils-dbg package
         path: ./dvbhdhomerun-utils-dbg*.deb
