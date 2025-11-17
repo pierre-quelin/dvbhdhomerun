@@ -22,7 +22,7 @@
 #ifndef __DVB_HDHOMERUN_DATA_H__
 #define __DVB_HDHOMERUN_DATA_H__
 
-#include "dvb_demux.h"
+#include <media/dvb_demux.h>
 
 #include "dvb_hdhomerun_control_messages.h"
 

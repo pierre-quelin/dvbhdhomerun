@@ -19,7 +19,7 @@
  *
  */
 
-#include <dvbdev.h>
+#include <media/dvbdev.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/dvb/dmx.h>
