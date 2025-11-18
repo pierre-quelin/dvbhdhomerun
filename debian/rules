@@ -17,7 +17,7 @@ build:
 	dh_testdir
 	$(MAKE) -C userhdhomerun
 
-clean: 
+clean:
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -73,6 +73,7 @@ binary-arch: build install
 	dh_installchangelogs debian/changelog
 	dh_installlogrotate
 	dh_installudev --priority=59
+	dh_installsystemd
 	dh_installinit
 	dh_installdocs
 	dh_link
