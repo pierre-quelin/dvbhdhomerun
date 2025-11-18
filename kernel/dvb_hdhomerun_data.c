@@ -116,7 +116,7 @@ int dvb_hdhomerun_data_init(int num_of_devices) {
 
    if(hdhomerun_major == -1) {
       /* Create class (should I use an existing?) */
-      hdhomerun_class = class_create(THIS_MODULE, "hdhomerun");
+      hdhomerun_class = class_create("hdhomerun");
       if (IS_ERR(hdhomerun_class)) {
          ret = PTR_ERR(hdhomerun_class);
          goto fail_class_create;
