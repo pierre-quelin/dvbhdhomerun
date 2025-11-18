@@ -12,7 +12,7 @@ obj-m += dvb_hdhomerun_fe.o
 
 ccflags-y	+= -I$(src)/headers/$(KVERMAJ).$(KVERMIN) -D__DVB_CORE__
 
-all: dvb_hdhomerun
+all: headers dvb_hdhomerun
 
 headers: headers/$(KVERMAJ).$(KVERMIN)
 	@echo Downloading kernel header dependencies...

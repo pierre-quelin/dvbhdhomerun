@@ -319,7 +319,7 @@ static int __devinit dvb_hdhomerun_probe(struct platform_device *plat_dev)
 	return ret;
 }
 
-static int dvb_hdhomerun_remove(struct platform_device *plat_dev)
+static void dvb_hdhomerun_remove(struct platform_device *plat_dev)
 {
 	struct dvb_hdhomerun *hdhomerun;
 
@@ -327,13 +327,13 @@ static int dvb_hdhomerun_remove(struct platform_device *plat_dev)
 
 	hdhomerun = platform_get_drvdata(plat_dev);
 	if (hdhomerun == NULL)
-		return 0;
+		return;
 
 	dvb_hdhomerun_unregister(hdhomerun);
 
 	platform_set_drvdata(plat_dev, NULL);
 	kfree(hdhomerun);
-	return 0;
+	return;
 }
 
 

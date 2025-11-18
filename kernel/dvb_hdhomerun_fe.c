@@ -265,11 +265,10 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_ofdm_ops = {
         .delsys = { SYS_DVBT },
 #endif
         .info = {
-                .name                   = "HDHomeRun DVB-T",
-                .type                   = FE_OFDM,
-                .frequency_stepsize     = 62500,
-                .frequency_min          = 50500000,
-                .frequency_max          = 862000000,
+                .name                   	= "HDHomeRun DVB-T",
+                .frequency_stepsize_hz		= 62500,
+                .frequency_min_hz			= 50500000,
+                .frequency_max_hz			= 862000000,
         .caps =
 		    FE_CAN_FEC_1_2 | FE_CAN_FEC_2_3 | FE_CAN_FEC_3_4 |
 		    FE_CAN_FEC_5_6 | FE_CAN_FEC_7_8 | FE_CAN_FEC_AUTO |
@@ -327,13 +326,12 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_qam_ops = {
    .delsys = { SYS_DVBC_ANNEX_A },
 #endif
 	.info = {
-		.name			= "HDHomeRun DVB-C",
-		.type			= FE_QAM,
-		.frequency_stepsize	= 62500,
-		.frequency_min		= 51000000,
-		.frequency_max		= 858000000,
-		.symbol_rate_min	= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
-		.symbol_rate_max	= (57840000/2)/4,      /* SACLK/4 */
+		.name					= "HDHomeRun DVB-C",
+		.frequency_stepsize_hz	= 62500,
+		.frequency_min_hz		= 51000000,
+		.frequency_max_hz		= 858000000,
+		.symbol_rate_min		= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
+		.symbol_rate_max		= (57840000/2)/4,      /* SACLK/4 */
 		.caps = FE_CAN_QAM_16 | FE_CAN_QAM_32 | FE_CAN_QAM_64 |
 			FE_CAN_QAM_128 | FE_CAN_QAM_256 | FE_CAN_QAM_AUTO |
 			FE_CAN_FEC_AUTO | FE_CAN_INVERSION_AUTO
@@ -389,13 +387,12 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_atsc_ops = {
    .delsys = { SYS_ATSC },
 #endif
 	.info = {
-		.name			= "HDHomeRun ATSC",
-		.type			= FE_ATSC,
-		.frequency_stepsize	= 62500,
-		.frequency_min		= 54000000,
-		.frequency_max		= 858000000,
-		.symbol_rate_min	= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
-		.symbol_rate_max	= (57840000/2)/4,      /* SACLK/4 */
+		.name					= "HDHomeRun ATSC",
+		.frequency_stepsize_hz	= 62500,
+		.frequency_min_hz		= 54000000,
+		.frequency_max_hz		= 858000000,
+		.symbol_rate_min		= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
+		.symbol_rate_max		= (57840000/2)/4,      /* SACLK/4 */
 		.caps = FE_CAN_FEC_AUTO | FE_CAN_INVERSION_AUTO | 
               FE_CAN_QAM_16 | FE_CAN_QAM_64 | FE_CAN_QAM_128 |
               FE_CAN_QAM_256 | FE_CAN_QAM_AUTO |
