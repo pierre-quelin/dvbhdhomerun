@@ -38,11 +38,10 @@ install: build
 	$(MAKE) -C userhdhomerun PREFIX=$(CURDIR)/debian/dvbhdhomerun-utils install
 
 	# DKMS package.
-	install -d "$(SRC)/$(NAME)-$(VERSION)"
-	cp -a kernel/*.c "$(SRC)/$(NAME)-$(VERSION)"	
-	cp -a kernel/*.h "$(SRC)/$(NAME)-$(VERSION)"	
-	cp -a kernel/Makefile "$(SRC)/$(NAME)-$(VERSION)"	
-	chmod 644 -R "$(SRC)/$(NAME)-$(VERSION)"
+	install -dm755 "$(SRC)/$(NAME)-$(VERSION)"
+	cp -a kernel/*.c "$(SRC)/$(NAME)-$(VERSION)"
+	cp -a kernel/*.h "$(SRC)/$(NAME)-$(VERSION)"
+	cp -a kernel/Makefile "$(SRC)/$(NAME)-$(VERSION)"
 
 	# Module assistant
 	# Create the directories to install the source into

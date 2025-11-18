@@ -12,33 +12,19 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: dvbhdhomerun
-        
+
     - name: Packages update
       run: |
         sudo apt-get update
-        sudo apt install dpkg-dev build-essential debhelper cmake libhdhomerun-dev dkms
+        sudo apt install dpkg-dev build-essential debhelper cmake libhdhomerun-dev dkms dh-dkms
 
     - name: Build packages
       run: |
         cd $GITHUB_WORKSPACE/dvbhdhomerun
         dpkg-buildpackage -b
-      
-    - uses: actions/upload-artifact@v3
-      with:
-        name: dvbhdhomerun-dkms package
-        path: ./dvbhdhomerun-dkms*.deb
 
-    - uses: actions/upload-artifact@v3
+    - name: Archive all dvbhdhomerun*.deb
+      uses: actions/upload-artifact@v4
       with:
-        name: dvbhdhomerun-source package
-        path: ./dvbhdhomerun-source*.deb
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: dvbhdhomerun-utils package
-        path: ./dvbhdhomerun-utils*.deb
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: dvbhdhomerun-utils-dbg package
-        path: ./dvbhdhomerun-utils-dbg*.deb
+        name: dvbhdhomerun deb packages
+        path: ./dvbhdhomerun*.deb
