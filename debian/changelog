@@ -1,10 +1,11 @@
-dvbhdhomerun (0.0.17) UNRELEASED; urgency=medium
+dvbhdhomerun (0.0.16+nmu4) UNRELEASED; urgency=medium
 
+  * Non-maintainer upload.
   * Fix header download, broken kernel release parsing.
   * Add add github action.
   * Fix build on Debian Trixie and Ubuntu 24.2.
 
- -- Pierre Quélin <pierre.quelin.1972@gmail.com>  Tue, 18 Nov 2025 08:38:04 +0100
+ -- Pierre Quélin <pierre.quelin.1972@gmail.com>  Wed, 19 Nov 2025 20:00:00 +0100
 
 dvbhdhomerun (0.0.16+nmu3) UNRELEASED; urgency=medium
 
