@@ -9,7 +9,11 @@ not hard, but I highly recommend you read the [Debian Maintainers build guide][5
     $ git clone https://github.com/pierre-quelin/dvbhdhomerun
     $ cd dvbhdhomerun && dpkg-buildpackage -b
     $ cd ..
-    $ dpkg -i <builtpackages>.deb
+    $ sudo dpkg -i dvbhdhomerun-source_<version>_all.deb
+    $ sudo dpkg -i dvbhdhomerun-dpkg_<version>_all.deb
+    $ sudo nano /etc/dvbhdhomerun
+    $ sudo dpkg -i dvbhdhomerun-utils_<version>_<arch>.deb
+    $ apt-get moo
 
 [1]: https://www.silicondust.com/
 [2]: https://www.silicondust.com/support/linux/

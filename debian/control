@@ -21,7 +21,7 @@ Description: Debug symbols for the userhdhomerun application.
 
 Package: dvbhdhomerun-source
 Architecture: all
-Depends: module-assistant, build-essential, debhelper (>= 7), make, bzip2, linux-headers-686-pae | linux-headers-amd64 | linux-headers-generic | linux-headers
+Depends: build-essential, debhelper (>= 10), make, bzip2, linux-headers-686-pae | linux-headers-amd64 | linux-headers-generic | linux-headers
 Description: Source for the dvbhdhomerun kernel driver.
  This package provides the source code for the dvbhdhomerun kernel modules, to
  be build with module-assistant. The dvbhdhomerun-utils package is required in
