@@ -30,41 +30,41 @@
 
 /* for the control device */
 struct kfifo control_fifo_user;
-EXPORT_SYMBOL(control_fifo_user);
+EXPORT_SYMBOL_GPL(control_fifo_user);
 
 struct kfifo control_fifo_kernel;
-EXPORT_SYMBOL(control_fifo_kernel);
+EXPORT_SYMBOL_GPL(control_fifo_kernel);
 
 spinlock_t control_spinlock_user;
-EXPORT_SYMBOL(control_spinlock_user);
+EXPORT_SYMBOL_GPL(control_spinlock_user);
 
 spinlock_t control_spinlock_kernel;
-EXPORT_SYMBOL(control_spinlock_kernel);
+EXPORT_SYMBOL_GPL(control_spinlock_kernel);
 
 wait_queue_head_t control_readq;
-EXPORT_SYMBOL(control_readq);
+EXPORT_SYMBOL_GPL(control_readq);
 
 wait_queue_head_t inq;
-EXPORT_SYMBOL(inq);
+EXPORT_SYMBOL_GPL(inq);
 
 wait_queue_head_t outq;
-EXPORT_SYMBOL(outq);
+EXPORT_SYMBOL_GPL(outq);
 
 int control_bufsize = 32768;
-EXPORT_SYMBOL(control_bufsize);
+EXPORT_SYMBOL_GPL(control_bufsize);
 
 /* Handles the case where the user space app ctrl-c's. I.E the hdhomerun app, shouldn't write to fifo.*/
 int wait_for_write = 0; /* Need mutex on this */
-EXPORT_SYMBOL(wait_for_write);
+EXPORT_SYMBOL_GPL(wait_for_write);
 
 /* Handles the case where the hdhomerun app is not running */
 int userspace_ready = 0; /* Need mutex on this */
-EXPORT_SYMBOL(userspace_ready);
+EXPORT_SYMBOL_GPL(userspace_ready);
 
 int hdhomerun_debug_mask = 0x0;
 module_param(hdhomerun_debug_mask, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(hdhomerun_debug_mask, "Mask for debug output\n");
-EXPORT_SYMBOL(hdhomerun_debug_mask);
+EXPORT_SYMBOL_GPL(hdhomerun_debug_mask);
 
 MODULE_AUTHOR("Villy Thomsen");
 MODULE_DESCRIPTION("HDHomeRun Driver Core Module");
@@ -86,7 +86,7 @@ int hdhomerun_control_post_message(struct dvbhdhomerun_control_mesg *mesg) {
 	}
 	return ret;
 }
-EXPORT_SYMBOL(hdhomerun_control_post_message);
+EXPORT_SYMBOL_GPL(hdhomerun_control_post_message);
 
 int hdhomerun_control_wait_for_message(struct dvbhdhomerun_control_mesg *mesg) {
 	DEBUG_FUNC(1);
@@ -102,7 +102,7 @@ int hdhomerun_control_wait_for_message(struct dvbhdhomerun_control_mesg *mesg) {
 	return my_kfifo_get(&control_fifo_kernel, (unsigned char*)mesg, sizeof(struct dvbhdhomerun_control_mesg));
 	wake_up_interruptible(&outq);
 }
-EXPORT_SYMBOL(hdhomerun_control_wait_for_message);
+EXPORT_SYMBOL_GPL(hdhomerun_control_wait_for_message);
 
 int hdhomerun_control_post_and_wait(struct dvbhdhomerun_control_mesg *mesg) {
 	int ret;
@@ -118,6 +118,6 @@ int hdhomerun_control_post_and_wait(struct dvbhdhomerun_control_mesg *mesg) {
 
 	return ret;
 }
-EXPORT_SYMBOL(hdhomerun_control_post_and_wait);
+EXPORT_SYMBOL_GPL(hdhomerun_control_post_and_wait);
 
 

@@ -1,3 +1,13 @@
+dvbhdhomerun (0.0.17) UNRELEASED; urgency=medium
+
+  * Fix kernel oops on Debian Trixie / kernel 6.12 (GitHub issue #7):
+    export frontend attach symbols as EXPORT_SYMBOL_GPL so dvb_attach()
+    / symbol_get() can find them, and do not crash if attach fails.
+  * Restore build compatibility with current Debian and Ubuntu kernels
+    (class_create, platform_driver.remove, DVB frequency field names).
+
+ -- Pierre Quélin <pierre.quelin.1972@gmail.com>  Thu, 20 Aug 2026 10:00:00 +0200
+
 dvbhdhomerun (0.0.16+nmu4) UNRELEASED; urgency=medium
 
   * Non-maintainer upload.

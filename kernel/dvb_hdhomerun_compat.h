@@ -34,4 +34,51 @@
 #define my_kfifo_put kfifo_in
 #endif
 
+/*
+ * class_create() dropped the owner argument in 6.4 (Debian Trixie,
+ * Ubuntu 24.04+). Keep a 2-arg wrapper for Bookworm / Ubuntu 22.04.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+#define hdhomerun_class_create(name) class_create(name)
+#else
+#define hdhomerun_class_create(name) class_create(THIS_MODULE, name)
+#endif
+
+/*
+ * platform_driver.remove:
+ *  < 6.11  : int  (*remove)(struct platform_device *)
+ *  6.11    : void (*remove_new)(...); int (*remove)(...) still present
+ *  >= 6.12 : void (*remove)(...); remove_new removed
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)
+#define HDHR_REMOVE_RET void
+#define HDHR_REMOVE_RETURN return
+#else
+#define HDHR_REMOVE_RET int
+#define HDHR_REMOVE_RETURN return 0
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
+#define HDHR_PLATFORM_REMOVE_CB remove_new
+#else
+#define HDHR_PLATFORM_REMOVE_CB remove
+#endif
+
+/*
+ * DVB frontend frequency fields were renamed to *_hz in 5.18.
+ * .type was removed at the same time.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
+#define HDHR_FE_FREQ(_step, _min, _max) \
+	.frequency_stepsize_hz = (_step), \
+	.frequency_min_hz = (_min), \
+	.frequency_max_hz = (_max)
+#else
+#define HDHR_FE_FREQ(_step, _min, _max) \
+	.frequency_stepsize = (_step), \
+	.frequency_min = (_min), \
+	.frequency_max = (_max)
+#endif
+
 #endif /* __DVB_HDHOMERUN_COMPAT_H__ */

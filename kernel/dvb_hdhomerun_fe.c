@@ -33,6 +33,7 @@
 #include <media/dvbdev.h>
 #include <media/dmxdev.h>
 
+#include "dvb_hdhomerun_compat.h"
 #include "dvb_hdhomerun_debug.h"
 #include "dvb_hdhomerun_core.h"
 #include "dvb_hdhomerun_control_messages.h"
@@ -106,7 +107,7 @@ static int dvb_hdhomerun_fe_read_ucblocks(struct dvb_frontend* fe, u32* ucblocks
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0)
 /* To clarify - Debian stretch kernel 4.9.0-6-amd64 */
 static int dvb_hdhomerun_fe_get_frontend(struct dvb_frontend* fe, struct dtv_frontend_properties *p)
-#elif if LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)
 static int dvb_hdhomerun_fe_get_frontend(struct dvb_frontend* fe)
 #else
 static int dvb_hdhomerun_fe_get_frontend(struct dvb_frontend* fe, struct dvb_frontend_parameters *p)
@@ -266,9 +267,7 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_ofdm_ops = {
 #endif
         .info = {
                 .name                   	= "HDHomeRun DVB-T",
-                .frequency_stepsize_hz		= 62500,
-                .frequency_min_hz			= 50500000,
-                .frequency_max_hz			= 862000000,
+                HDHR_FE_FREQ(62500, 50500000, 862000000),
         .caps =
 		    FE_CAN_FEC_1_2 | FE_CAN_FEC_2_3 | FE_CAN_FEC_3_4 |
 		    FE_CAN_FEC_5_6 | FE_CAN_FEC_7_8 | FE_CAN_FEC_AUTO |
@@ -327,9 +326,7 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_qam_ops = {
 #endif
 	.info = {
 		.name					= "HDHomeRun DVB-C",
-		.frequency_stepsize_hz	= 62500,
-		.frequency_min_hz		= 51000000,
-		.frequency_max_hz		= 858000000,
+		HDHR_FE_FREQ(62500, 51000000, 858000000),
 		.symbol_rate_min		= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
 		.symbol_rate_max		= (57840000/2)/4,      /* SACLK/4 */
 		.caps = FE_CAN_QAM_16 | FE_CAN_QAM_32 | FE_CAN_QAM_64 |
@@ -388,9 +385,7 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_atsc_ops = {
 #endif
 	.info = {
 		.name					= "HDHomeRun ATSC",
-		.frequency_stepsize_hz	= 62500,
-		.frequency_min_hz		= 54000000,
-		.frequency_max_hz		= 858000000,
+		HDHR_FE_FREQ(62500, 54000000, 858000000),
 		.symbol_rate_min		= (57840000/2)/64,     /* SACLK/64 == (XIN/2)/64 */
 		.symbol_rate_max		= (57840000/2)/4,      /* SACLK/4 */
 		.caps = FE_CAN_FEC_AUTO | FE_CAN_INVERSION_AUTO | 
@@ -418,7 +413,13 @@ static struct dvb_frontend_ops dvb_hdhomerun_fe_atsc_ops = {
 };
 
 
-EXPORT_SYMBOL(dvb_hdhomerun_fe_attach_dvbc);
-EXPORT_SYMBOL(dvb_hdhomerun_fe_attach_atsc);
-EXPORT_SYMBOL(dvb_hdhomerun_fe_attach_dvbt);
+/*
+ * dvb_attach() looks these up with symbol_get(). Since Linux 6.5 (and
+ * stable 6.1), symbol_get() only resolves EXPORT_SYMBOL_GPL symbols.
+ * Using EXPORT_SYMBOL caused: "failing symbol_get of non-GPLONLY symbol"
+ * and a NULL frontend, which then oopsed the kernel (GitHub issue #7).
+ */
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_fe_attach_dvbc);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_fe_attach_atsc);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_fe_attach_dvbt);
 

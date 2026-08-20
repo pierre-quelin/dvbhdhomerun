@@ -36,6 +36,7 @@
 #include <linux/spinlock.h>
 #include <linux/wait.h>
 
+#include "dvb_hdhomerun_compat.h"
 #include "dvb_hdhomerun_core.h"
 #include "dvb_hdhomerun_debug.h"
 #include "dvb_hdhomerun_data.h"
@@ -116,7 +117,7 @@ int dvb_hdhomerun_data_init(int num_of_devices) {
 
    if(hdhomerun_major == -1) {
       /* Create class (should I use an existing?) */
-      hdhomerun_class = class_create("hdhomerun");
+      hdhomerun_class = hdhomerun_class_create("hdhomerun");
       if (IS_ERR(hdhomerun_class)) {
          ret = PTR_ERR(hdhomerun_class);
          goto fail_class_create;
@@ -137,7 +138,7 @@ int dvb_hdhomerun_data_init(int num_of_devices) {
    printk(KERN_ERR "unable to create class for hdhomerun\n");
    return ret;
 }
-EXPORT_SYMBOL(dvb_hdhomerun_data_init);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_data_init);
   
 int dvb_hdhomerun_data_create_device(struct dvb_demux *dvb_demux, int id) {
    struct hdhomerun_data_state *state;
@@ -170,6 +171,7 @@ int dvb_hdhomerun_data_create_device(struct dvb_demux *dvb_demux, int id) {
       printk(KERN_ERR
              "HDHomeRun: Cannot allocate write buffer for device %d\n",
              id);
+      kfree(state);
       return -ENOMEM;
    }
 
@@ -202,22 +204,35 @@ int dvb_hdhomerun_data_create_device(struct dvb_demux *dvb_demux, int id) {
 
  fail_device_create:
    printk(KERN_ERR "unable to create device /dev/hdhomerun%d\n", id);
+   cdev_del(&state->cdev);
+   free_page((unsigned long)state->write_buffer);
+   kfree(state);
    return ret;
 }
-EXPORT_SYMBOL(dvb_hdhomerun_data_create_device);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_data_create_device);
 
 void dvb_hdhomerun_data_delete_device(int id) {
+   struct hdhomerun_data_state *state;
+
    DEBUG_FUNC(1);
 
-   /* free allocated buffer */
-   if(hdhomerun_data_states[id]->write_buffer != NULL) {
-      free_page((unsigned long)hdhomerun_data_states[id]->write_buffer);
-      hdhomerun_data_states[id]->write_buffer = NULL;
+   if (id < 0 || id >= HDHOMERUN_MAX_TUNERS)
+      return;
+
+   state = hdhomerun_data_states[id];
+   if (!state)
+      return;
+
+   if (state->write_buffer != NULL) {
+      free_page((unsigned long)state->write_buffer);
+      state->write_buffer = NULL;
    }
-   cdev_del(&hdhomerun_data_states[id]->cdev);
-   device_destroy(hdhomerun_class, hdhomerun_data_states[id]->dev);
+   cdev_del(&state->cdev);
+   device_destroy(hdhomerun_class, state->dev);
+   hdhomerun_data_states[id] = NULL;
+   kfree(state);
 }
-EXPORT_SYMBOL(dvb_hdhomerun_data_delete_device);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_data_delete_device);
 
 void dvb_hdhomerun_data_exit() {
    DEBUG_FUNC(1);
@@ -229,4 +244,4 @@ void dvb_hdhomerun_data_exit() {
       class_destroy(hdhomerun_class);
    }
 }
-EXPORT_SYMBOL(dvb_hdhomerun_data_exit);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_data_exit);
