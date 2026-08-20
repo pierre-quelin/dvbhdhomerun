@@ -299,7 +299,7 @@ int dvb_hdhomerun_control_init() {
 error:
 	return ret;
 }
-EXPORT_SYMBOL(dvb_hdhomerun_control_init);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_control_init);
 
 void dvb_hdhomerun_control_exit() {
 	DEBUG_FUNC(1);
@@ -310,4 +310,4 @@ void dvb_hdhomerun_control_exit() {
 
 	misc_deregister(&hdhomerun_control_device);
 }
-EXPORT_SYMBOL(dvb_hdhomerun_control_exit);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_control_exit);

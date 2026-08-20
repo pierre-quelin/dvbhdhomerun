@@ -23,6 +23,7 @@
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
+#include <linux/string.h>
 
 #include <linux/platform_device.h>
 
@@ -32,6 +33,7 @@
 #include <media/dvbdev.h>
 #include <media/dmxdev.h>
 
+#include "dvb_hdhomerun_compat.h"
 #include "dvb_hdhomerun_control.h"
 #include "dvb_hdhomerun_core.h"
 #include "dvb_hdhomerun_data.h"
@@ -44,6 +46,7 @@ MODULE_AUTHOR("Villy Thomsen");
 MODULE_DESCRIPTION("HDHomeRun Driver");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(HDHOMERUN_VERSION);
+MODULE_SOFTDEP("pre: dvb_hdhomerun_core dvb_hdhomerun_fe");
 
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
@@ -212,9 +215,12 @@ static int __devinit dvb_hdhomerun_register(struct dvb_hdhomerun *hdhomerun)
 	  hdhomerun->fe = dvb_attach(dvb_hdhomerun_fe_attach_atsc, hdhomerun->plat_dev->id);
 	}
 
-	ret = (hdhomerun->fe == NULL) ? -1 : 0;
-	if (ret < 0)
+	if (hdhomerun->fe == NULL) {
+		printk(KERN_ERR "HDHomeRun%d: frontend attach failed (is dvb_hdhomerun_fe loaded?)\n",
+		       hdhomerun->instance);
+		ret = -ENODEV;
 		goto err_disconnect_frontend;
+	}
 
    if(hdhomerun->tuner_data.use_full_name) {
       len = strlen((const char*)hdhomerun->fe->ops.info.name);
@@ -237,12 +243,16 @@ static int __devinit dvb_hdhomerun_register(struct dvb_hdhomerun *hdhomerun)
 	mutex_init(&hdhomerun->feedlock);
 
 	ret = dvb_hdhomerun_data_create_device(dvbdemux, hdhomerun->plat_dev->id);
+	if (ret < 0)
+		goto err_unregister_frontend;
 
-	return ret;
+	return 0;
 
+err_unregister_frontend:
+	dvb_unregister_frontend(hdhomerun->fe);
 err_release_frontend:
-	if (hdhomerun->fe->ops.release)
-		hdhomerun->fe->ops.release(hdhomerun->fe);
+	dvb_frontend_detach(hdhomerun->fe);
+	hdhomerun->fe = NULL;
 err_disconnect_frontend:
 	dmx->disconnect_frontend(dmx);
 err_remove_mem_frontend:
@@ -283,8 +293,11 @@ static void dvb_hdhomerun_unregister(struct dvb_hdhomerun *hdhomerun)
 	dvb_dmxdev_release(&hdhomerun->dmxdev);
 	dvb_dmx_release(dvbdemux);
 	dvbdemux->priv = NULL;
-	dvb_unregister_frontend(hdhomerun->fe);
-	dvb_frontend_detach(hdhomerun->fe);
+	if (hdhomerun->fe) {
+		dvb_unregister_frontend(hdhomerun->fe);
+		dvb_frontend_detach(hdhomerun->fe);
+		hdhomerun->fe = NULL;
+	}
 	dvb_unregister_adapter(dvb_adapter);
 }
 
@@ -319,7 +332,7 @@ static int __devinit dvb_hdhomerun_probe(struct platform_device *plat_dev)
 	return ret;
 }
 
-static void dvb_hdhomerun_remove(struct platform_device *plat_dev)
+static HDHR_REMOVE_RET dvb_hdhomerun_remove(struct platform_device *plat_dev)
 {
 	struct dvb_hdhomerun *hdhomerun;
 
@@ -327,13 +340,13 @@ static void dvb_hdhomerun_remove(struct platform_device *plat_dev)
 
 	hdhomerun = platform_get_drvdata(plat_dev);
 	if (hdhomerun == NULL)
-		return;
+		HDHR_REMOVE_RETURN;
 
 	dvb_hdhomerun_unregister(hdhomerun);
 
 	platform_set_drvdata(plat_dev, NULL);
 	kfree(hdhomerun);
-	return;
+	HDHR_REMOVE_RETURN;
 }
 
 
@@ -341,8 +354,10 @@ int dvb_hdhomerun_register_hdhomerun(struct hdhomerun_register_tuner_data *tuner
 {
 	int i;
 	int ret;
+	int id;
 	struct dvb_hdhomerun *hdhomerun;
 	struct hdhomerun_register_tuner_data *tmp;
+	struct platform_device *pdev;
 
 	DEBUG_FUNC(1);
 
@@ -350,9 +365,13 @@ int dvb_hdhomerun_register_hdhomerun(struct hdhomerun_register_tuner_data *tuner
 	   case where userhdhomerun has been stopped/started. */
 	if(hdhomerun_num_of_devices > 0) {
 		for(i = 0; i < hdhomerun_num_of_devices; ++i) {
+			if (!platform_device[i])
+				continue;
 			hdhomerun = platform_get_drvdata(platform_device[i]);
+			if (!hdhomerun)
+				continue;
 			tmp = &hdhomerun->tuner_data;
-			if(strncmp(tuner_data->name, tmp->name, 10) == 0) {
+			if(strncmp(tuner_data->name, tmp->name, sizeof(tmp->name)) == 0) {
 				/* Already have that tuner */
 				printk("hdhomerun: dvb device for this tuner already exists, ignore request %s\n", tuner_data->name);
 				tuner_data->id = tmp->id;
@@ -361,33 +380,49 @@ int dvb_hdhomerun_register_hdhomerun(struct hdhomerun_register_tuner_data *tuner
 		}
 	}
 
-	if(hdhomerun_num_of_devices < HDHOMERUN_MAX_TUNERS) {
-		platform_device[hdhomerun_num_of_devices] = platform_device_register_simple("HDHomeRun",
-											    hdhomerun_num_of_devices, NULL, 0);
-		if (IS_ERR(platform_device)) {
-			printk(KERN_ERR "HdhomeRun: could not allocate and register instance %d\n", hdhomerun_num_of_devices);
-			return -ENODEV;
-		}
-		tuner_data->id = platform_device[hdhomerun_num_of_devices]->id;
+	if(hdhomerun_num_of_devices >= HDHOMERUN_MAX_TUNERS)
+		return -ENODEV;
 
-		hdhomerun = platform_get_drvdata(platform_device[hdhomerun_num_of_devices]);
-		hdhomerun->tuner_data = *tuner_data;
-
-		ret = dvb_hdhomerun_register(hdhomerun);
-		if (ret < 0) {
-			platform_set_drvdata(platform_device[hdhomerun_num_of_devices], NULL);
-			kfree(hdhomerun);
-		}
-
-		hdhomerun_num_of_devices++;
+	id = hdhomerun_num_of_devices;
+	pdev = platform_device_register_simple("HDHomeRun", id, NULL, 0);
+	if (IS_ERR(pdev)) {
+		printk(KERN_ERR "HDHomeRun: could not allocate and register instance %d\n", id);
+		return PTR_ERR(pdev);
 	}
-	else {
+	platform_device[id] = pdev;
+	tuner_data->id = pdev->id;
+
+	hdhomerun = platform_get_drvdata(pdev);
+	if (!hdhomerun) {
+		printk(KERN_ERR "HDHomeRun: missing driver data for instance %d\n", id);
+		platform_device_unregister(pdev);
+		platform_device[id] = NULL;
 		return -ENODEV;
 	}
+	hdhomerun->tuner_data = *tuner_data;
 
+	ret = dvb_hdhomerun_register(hdhomerun);
+	if (ret < 0) {
+		printk(KERN_ERR "HDHomeRun: failed to register DVB adapter for %s (%d)\n",
+		       tuner_data->name, ret);
+		/*
+		 * dvb_hdhomerun_register() already rolled back DVB
+		 * objects. Drop drvdata so .remove is a no-op, then
+		 * unregister the platform device. Do not count this
+		 * instance: a later tuner used to oops in strncmp()
+		 * on the freed/NULL hdhomerun (GitHub issue #7).
+		 */
+		platform_set_drvdata(pdev, NULL);
+		kfree(hdhomerun);
+		platform_device_unregister(pdev);
+		platform_device[id] = NULL;
+		return ret;
+	}
+
+	hdhomerun_num_of_devices++;
 	return 0;
 }
-EXPORT_SYMBOL(dvb_hdhomerun_register_hdhomerun);
+EXPORT_SYMBOL_GPL(dvb_hdhomerun_register_hdhomerun);
 
 
 /*
@@ -396,7 +431,7 @@ EXPORT_SYMBOL(dvb_hdhomerun_register_hdhomerun);
 
 static struct platform_driver dvb_hdhomerun_platform_driver = {
 	.probe = dvb_hdhomerun_probe,
-	.remove = dvb_hdhomerun_remove,
+	.HDHR_PLATFORM_REMOVE_CB = dvb_hdhomerun_remove,
 	.driver = {
 		.name = "HDHomeRun",
 	},
@@ -444,8 +479,12 @@ static void __exit dvb_hdhomerun_exit(void)
 	if(hdhomerun_num_of_devices) {
 		for(i = 0; i < hdhomerun_num_of_devices; ++i) {
 			dvb_hdhomerun_data_delete_device(i);
-			platform_device_unregister(platform_device[i]);
+			if (platform_device[i]) {
+				platform_device_unregister(platform_device[i]);
+				platform_device[i] = NULL;
+			}
 		}
+		hdhomerun_num_of_devices = 0;
 	}
 
 	dvb_hdhomerun_data_exit();
